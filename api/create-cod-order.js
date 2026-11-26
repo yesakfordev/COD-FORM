@@ -3,6 +3,7 @@ try {
 } catch (_) {}
 const axios = require("axios");
 const crypto = require("crypto");
+const { syncToNotion } = require("../lib/notion-sync");
 let waitUntil;
 try {
   ({ waitUntil } = require("@vercel/functions"));
@@ -974,6 +975,31 @@ Address: ${address}`;
       value: total,
       currency: entity.currency || "ETB",
     });
+
+    if (process.env.NOTION_TOKEN && (process.env.NOTION_DATABASE_ID || process.env.NOTION_DELIVERY_DATABASE_ID)) {
+      const scheduleNotion = async () => {
+        try {
+          const parentDb = isCreateOrder
+            ? (process.env.NOTION_DELIVERY_DATABASE_ID || process.env.NOTION_DATABASE_ID)
+            : process.env.NOTION_DATABASE_ID;
+          await syncToNotion({
+            entity,
+            isOrder: isCreateOrder,
+            store: SHOPIFY_STORE,
+            notionToken: process.env.NOTION_TOKEN,
+            databaseId: parentDb,
+            idempotencyKey: idemKey,
+          });
+        } catch (notionErr) {
+          console.error("Direct Notion sync error:", notionErr?.message || notionErr);
+        }
+      };
+      if (typeof waitUntil === "function") {
+        waitUntil(scheduleNotion());
+      } else {
+        scheduleNotion().catch(() => {});
+      }
+    }
 
     console.info("COD Order created successfully:", {
       type: isCreateOrder ? "order" : "draft_order",

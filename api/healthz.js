@@ -94,12 +94,35 @@ async function probeShopify() {
 async function tryResolveNotionTarget(notion, id) {
   try {
     const database = await notion.databases.retrieve({ database_id: id });
-    return {
-      ok: true,
-      kind: "database",
-      title: database?.title?.[0]?.plain_text || null,
-      propertyCount: Object.keys(database?.properties || {}).length,
-    };
+    if (database) {
+      if (database.properties && Object.keys(database.properties).length > 0) {
+        return {
+          ok: true,
+          kind: "database",
+          title: database?.title?.[0]?.plain_text || null,
+          propertyCount: Object.keys(database.properties).length,
+        };
+      }
+      if (Array.isArray(database.data_sources) && database.data_sources.length > 0) {
+        try {
+          const ds = await notion.dataSources.retrieve({
+            data_source_id: database.data_sources[0].id,
+          });
+          return {
+            ok: true,
+            kind: "data_source",
+            title: database?.title?.[0]?.plain_text || ds?.title?.[0]?.plain_text || null,
+            propertyCount: Object.keys(ds?.properties || {}).length,
+          };
+        } catch (_) {}
+      }
+      return {
+        ok: true,
+        kind: "database",
+        title: database?.title?.[0]?.plain_text || null,
+        propertyCount: 0,
+      };
+    }
   } catch {}
 
   try {
