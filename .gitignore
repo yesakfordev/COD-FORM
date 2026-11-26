@@ -1,0 +1,46 @@
+# Node
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel/
+# Dependencies
+node_modules/
+
+# Environment / secrets
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.tmp
+~$*
+
+# Build output
+dist/
+build/
+
+# Coverage
+coverage/
+
+# Optional: lock files from other managers you don't use
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

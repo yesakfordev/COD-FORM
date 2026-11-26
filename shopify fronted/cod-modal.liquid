@@ -1,0 +1,89 @@
+<div id="custom-cod-modal" class="custom-cod-modal hidden" aria-hidden="true">
+  <div class="custom-cod-modal-container">
+    <form id="custom-cod-form" class="custom-cod-form" data-submit-url="https://shopify-cod-xi.vercel.app/api/create-cod-order" data-cod-key="{{ settings.cod_api_key | escape }}" data-confirm-phone="+251 911 405 422" data-confirm-handle="@unicart_et" data-currency="{{ cart.currency.iso_code | default: shop.currency | default: 'ETB' }}">
+      <div class="custom-cod-modal-header">
+        <div class="custom-cod-modal-title">እባክዎን ለማዘዝ ቅጹን ይሙሉ</div>
+        <button type="button" class="custom-cod-modal-close" aria-label="Close modal">×</button>
+      </div>
+      
+      <div class="custom-cod-order-summary">
+        <div id="cod-product-list" class="cod-product-list"></div>
+      </div>
+      
+      <div class="custom-cod-totals">
+        <div class="custom-cod-total-row"><span>Subtotal</span><span id="cod-subtotal">--</span></div>
+        <div class="custom-cod-total-row"><span>Shipping</span><span>Free</span></div>
+        <div class="custom-cod-total-row total"><span>Total</span><span id="cod-total">--</span></div>
+      </div>
+      
+      <div class="custom-cod-address">
+        <span>
+
+          <p>Enter your delivery address:</p>
+          <div id="cod-error-bar" class="cod-error-bar" aria-live="polite" aria-atomic="true" hidden></div>
+        </span>
+
+        <div class="custom-cod-input-group">
+          <label for="full_name">ስም/Name<span class="required">*</span></label>
+          <div class="input-with-icon">
+            <span class="input-icon" aria-hidden="true">👤</span>
+            <input type="text" id="full_name" name="full_name" required>
+          </div>
+        </div>
+
+        <div class="custom-cod-input-group">
+          <label for="phone">ስልክ/Phone<span class="required">*</span></label>
+          <div class="input-with-icon">
+            <span class="input-icon" aria-hidden="true">📞</span>
+            <input type="tel" id="phone" name="phone" required>
+          </div>
+        </div>
+
+        <div class="custom-cod-input-group">
+          <label for="city">ከተማ/City<span class="required">*</span></label>
+          <div class="input-with-icon">
+            <span class="input-icon" aria-hidden="true">📍</span>
+            <input type="text" id="city" name="city" required>
+          </div>
+        </div>
+
+        <div class="custom-cod-input-group">
+          <label for="address"> ሰፈር/Address <span class="required">*</span></label>
+          <div class="input-with-icon">
+            <span class="input-icon" aria-hidden="true">🏠</span>
+            <input type="text" id="address" name="address" required>
+          </div>
+        </div>
+      </div>
+       <ul class="custom-cod-terms">
+        <li>ትዕዛዝዎ እንዲጀመር የትዕዛዙን ዋጋ 50% ማስገባት ያስፈልጋል።</li>
+         <li>ትዕዛዝዎን በ 15-20 ቀናት ውስጥ በነፃ ያሉበት ቦታ እናደርሳለን።</li>
+        {% comment %}<li>በጥራት ወይም በሳይዝ ደስተኛ ካልሆኑ በነፃ መቀየር ወይም ገንዘቡን ሙሉ በሙሉ ማስመለስ ይችላሉ።</li> {% endcomment %}
+      </ul> 
+
+      <button type="submit" class="custom-cod-submit">Place Order</button>
+    </form>
+  </div>
+</div>
+
+<div id="custom-cod-confirm-modal" class="custom-cod-modal custom-cod-confirm-modal hidden" aria-hidden="true">
+  <div class="custom-cod-modal-container custom-cod-confirm-modal-container">
+    <button type="button" class="custom-cod-modal-close custom-cod-confirm-modal-close" aria-label="Close confirmation">×</button>
+    <div class="custom-cod-confirmation">
+      <div class="custom-cod-confirmation-icon" aria-hidden="true">✓</div>
+      <p class="custom-cod-confirmation-title">ትእዛዝዎ ተቀብለናል!</p>
+      <p class="custom-cod-confirmation-copy">ለማረጋገጥ በቅርቡ እንደውልዎታለን።</p>
+      <p class="custom-cod-confirmation-title en">Your order has been received!</p>
+      <p class="custom-cod-confirmation-copy en">We will call you shortly to confirm your order.</p>
+      <div class="custom-cod-confirmation-contact">
+        <span>📞</span>
+        <span id="cod-confirm-phone">+251 911 405 422</span>
+      </div>
+      <div class="custom-cod-confirmation-contact">
+        <span>📩</span>
+        <span id="cod-confirm-handle">@unicart_et</span>
+      </div>
+      <button type="button" class="custom-cod-confirmation-close">Close</button>
+    </div>
+  </div>
+</div>
