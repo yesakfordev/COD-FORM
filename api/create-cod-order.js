@@ -874,13 +874,6 @@ module.exports = async function handler(req, res) {
     { name: "User agent", value: clientUserAgent || "" },
   ].filter((n) => n.value !== "");
 
-  const noteText = `Pre-Order (15-21 Days Delivery):
-Customer: ${fullName}
-Phone: ${normalizedPhone || phoneNumber}
-City: ${city}
-Address: ${address}
-Payment: 50% Advance Required`;
-
   // Build creation payload
   let endpoint;
   let orderPayload;
@@ -896,7 +889,7 @@ Payment: 50% Advance Required`;
         shipping_address: shippingAddress,
         billing_address: shippingAddress,
         financial_status: "pending",
-        note: noteText,
+        note: "",
         tags: buildTagString(tags),
         note_attributes: noteAttributes,
       },
@@ -911,7 +904,7 @@ Payment: 50% Advance Required`;
         phone: normalizedPhone || undefined,
         shipping_address: shippingAddress,
         billing_address: shippingAddress,
-        note: noteText,
+        note: "",
         tags: buildTagString(tags),
         note_attributes: noteAttributes,
       },
