@@ -89,9 +89,13 @@ module.exports = async function handler(req, res) {
 
   const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET || "";
   const NOTION_TOKEN = process.env.NOTION_TOKEN || "";
-  const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID || ""; // Draft Orders database
+  const NOTION_DATABASE_ID =
+    process.env.NOTION_DATABASE_ID || "41f8628f29368031bce9c8fec9cbee7c"; // Draft Orders database
   const NOTION_DELIVERY_DATABASE_ID =
-    process.env.NOTION_DELIVERY_DATABASE_ID || NOTION_DATABASE_ID; // Orders database
+    process.env.NOTION_DELIVERY_DATABASE_ID &&
+    process.env.NOTION_DELIVERY_DATABASE_ID !== "2ccd51ce31da8089bfe3d7a94e57dca4"
+      ? process.env.NOTION_DELIVERY_DATABASE_ID
+      : "4248628f293680c19769c4c4d42b3b39"; // Delivery database for real orders
   const SHOPIFY_STORE = process.env.SHOPIFY_STORE || "";
 
   if (!SHOPIFY_WEBHOOK_SECRET) {

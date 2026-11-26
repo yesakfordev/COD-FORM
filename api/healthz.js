@@ -144,7 +144,11 @@ async function tryResolveNotionTarget(notion, id) {
 async function probeNotion() {
   const token = process.env.NOTION_TOKEN || "";
   const draftId = process.env.NOTION_DATABASE_ID || "";
-  const orderId = process.env.NOTION_DELIVERY_DATABASE_ID || "";
+  const orderId =
+    process.env.NOTION_DELIVERY_DATABASE_ID &&
+    process.env.NOTION_DELIVERY_DATABASE_ID !== "2ccd51ce31da8089bfe3d7a94e57dca4"
+      ? process.env.NOTION_DELIVERY_DATABASE_ID
+      : "4248628f293680c19769c4c4d42b3b39";
 
   if (!token) {
     return summarizeCheck("notion", false, "Missing NOTION_TOKEN");
@@ -225,7 +229,13 @@ module.exports = async function handler(req, res) {
     notion: {
       tokenPresent: Boolean(process.env.NOTION_TOKEN),
       draftTarget: maskValue(process.env.NOTION_DATABASE_ID, 6),
-      orderTarget: maskValue(process.env.NOTION_DELIVERY_DATABASE_ID, 6),
+      orderTarget: maskValue(
+        process.env.NOTION_DELIVERY_DATABASE_ID &&
+        process.env.NOTION_DELIVERY_DATABASE_ID !== "2ccd51ce31da8089bfe3d7a94e57dca4"
+          ? process.env.NOTION_DELIVERY_DATABASE_ID
+          : "4248628f293680c19769c4c4d42b3b39",
+        6
+      ),
     },
     facebook: {
       configured: Boolean(process.env.FB_PIXEL_ID && process.env.FB_CAPI_TOKEN),
