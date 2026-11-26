@@ -2,7 +2,7 @@
   "name": "cod-backend",
   "version": "1.0.0",
   "description": "Cash on Delivery (COD) Backend for Shopify with Notion Sync",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "build": "echo 'Ready'",
     "start": "vercel dev",
