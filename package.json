@@ -4,6 +4,7 @@
   "description": "Cash on Delivery (COD) Backend for Shopify with Notion Sync",
   "main": "server.js",
   "scripts": {
+    "build": "echo 'Ready'",
     "start": "vercel dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
