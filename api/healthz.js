@@ -80,7 +80,14 @@ async function probeShopify() {
       apiVersion,
     });
   } catch (err) {
-    return summarizeCheck("shopify", false, err.response?.data || err.message);
+    const errorData = err.response?.data || err.message;
+    if (!process.env.SHOPIFY_CLIENT_ID || !process.env.SHOPIFY_CLIENT_SECRET) {
+      return summarizeCheck("shopify", false, {
+        error: errorData,
+        hint: "SHOPIFY_CLIENT_ID or SHOPIFY_CLIENT_SECRET is missing from Vercel Environment Variables. Please add them in Vercel Project Settings.",
+      });
+    }
+    return summarizeCheck("shopify", false, errorData);
   }
 }
 
@@ -186,6 +193,8 @@ module.exports = async function handler(req, res) {
       storePresent: Boolean(process.env.SHOPIFY_STORE),
       store: maskValue(process.env.SHOPIFY_STORE, 6),
       adminTokenPresent: Boolean(process.env.SHOPIFY_ADMIN_TOKEN),
+      clientIdPresent: Boolean(process.env.SHOPIFY_CLIENT_ID),
+      clientSecretPresent: Boolean(process.env.SHOPIFY_CLIENT_SECRET),
       webhookSecretPresent: Boolean(process.env.SHOPIFY_WEBHOOK_SECRET),
       apiVersion: process.env.SHOPIFY_API_VERSION || "2025-01",
       orderType: process.env.SHOPIFY_ORDER_TYPE || "draft_order",
