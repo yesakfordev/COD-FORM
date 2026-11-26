@@ -68,6 +68,51 @@ const IDEM_RECONCILE_DELAY_MS = 700;
 const META_MAX_FBCLID_AGE_MS = 90 * 24 * 60 * 60 * 1000;
 const inFlightIdemLocks = new Map();
 
+// Token caching for Client Credentials Grant
+let cachedShopifyToken = process.env.SHOPIFY_ADMIN_TOKEN || "";
+let tokenExpiresAt = 0;
+
+async function getShopifyAccessToken(SHOPIFY_STORE) {
+  const clientId = process.env.SHOPIFY_CLIENT_ID || "";
+  const clientSecret = process.env.SHOPIFY_CLIENT_SECRET || "";
+
+  // If Client Credentials are provided, automatically exchange and refresh
+  if (clientId && clientSecret) {
+    const now = Date.now();
+    if (cachedShopifyToken && now < tokenExpiresAt - 60000) {
+      return cachedShopifyToken;
+    }
+
+    try {
+      const resp = await axios.post(
+        `https://${SHOPIFY_STORE}/admin/oauth/access_token`,
+        new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          grant_type: "client_credentials",
+        }).toString(),
+        {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          timeout: 7000,
+        }
+      );
+
+      if (resp.data?.access_token) {
+        cachedShopifyToken = resp.data.access_token;
+        const expiresInSec = Number(resp.data.expires_in) || 86400;
+        tokenExpiresAt = now + expiresInSec * 1000;
+        return cachedShopifyToken;
+      }
+    } catch (err) {
+      console.error("Shopify client credentials token exchange failed:", err?.response?.data || err.message);
+      if (cachedShopifyToken) return cachedShopifyToken;
+      throw err;
+    }
+  }
+
+  return process.env.SHOPIFY_ADMIN_TOKEN || cachedShopifyToken || "";
+}
+
 function readTimeoutMs(value, fallbackMs, minimumMs) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -620,8 +665,21 @@ module.exports = async function handler(req, res) {
     process.env.SHOPIFY_ORDER_TYPE || "draft_order"
   ).toLowerCase();
 
-  if (!SHOPIFY_STORE || !SHOPIFY_ADMIN_TOKEN) {
+  const hasClientCredentials = Boolean(
+    process.env.SHOPIFY_CLIENT_ID && process.env.SHOPIFY_CLIENT_SECRET
+  );
+  if (!SHOPIFY_STORE || (!process.env.SHOPIFY_ADMIN_TOKEN && !hasClientCredentials)) {
     return json(res, 500, { error: "Missing required Shopify environment variables" });
+  }
+
+  let activeToken;
+  try {
+    activeToken = await getShopifyAccessToken(SHOPIFY_STORE);
+  } catch (err) {
+    return json(res, 500, {
+      error: "Failed to authenticate with Shopify API",
+      detail: err?.response?.data || err.message,
+    });
   }
 
   let body;
@@ -724,7 +782,7 @@ module.exports = async function handler(req, res) {
     baseURL: `https://${SHOPIFY_STORE}/admin/api/${SHOPIFY_API_VERSION}`,
     headers: {
       "Content-Type": "application/json",
-      "X-Shopify-Access-Token": SHOPIFY_ADMIN_TOKEN,
+      "X-Shopify-Access-Token": activeToken,
     },
     timeout: readTimeoutMs(process.env.SHOPIFY_ADMIN_TIMEOUT_MS, 7000, 2000),
   });

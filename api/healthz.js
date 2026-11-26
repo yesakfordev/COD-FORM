@@ -34,20 +34,42 @@ function summarizeCheck(name, ok, details) {
   };
 }
 
+async function getShopifyToken(store) {
+  const clientId = process.env.SHOPIFY_CLIENT_ID || "";
+  const clientSecret = process.env.SHOPIFY_CLIENT_SECRET || "";
+  if (clientId && clientSecret) {
+    const resp = await axios.post(
+      `https://${store}/admin/oauth/access_token`,
+      new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: "client_credentials",
+      }).toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" }, timeout: 5000 }
+    );
+    return resp.data?.access_token || "";
+  }
+  return process.env.SHOPIFY_ADMIN_TOKEN || "";
+}
+
 async function probeShopify() {
   const store = process.env.SHOPIFY_STORE || "";
-  const adminToken = process.env.SHOPIFY_ADMIN_TOKEN || "";
   const apiVersion = process.env.SHOPIFY_API_VERSION || "2025-01";
   const baseURL = buildStoreAdminBase(store);
 
-  if (!store || !adminToken || !baseURL) {
-    return summarizeCheck("shopify", false, "Missing SHOPIFY_STORE or SHOPIFY_ADMIN_TOKEN");
+  if (!store || !baseURL) {
+    return summarizeCheck("shopify", false, "Missing SHOPIFY_STORE");
   }
 
   try {
+    const token = await getShopifyToken(store);
+    if (!token) {
+      return summarizeCheck("shopify", false, "Missing SHOPIFY_ADMIN_TOKEN or SHOPIFY_CLIENT_ID & SHOPIFY_CLIENT_SECRET");
+    }
+
     const response = await axios.get(`${baseURL}/admin/api/${apiVersion}/shop.json`, {
       headers: {
-        "X-Shopify-Access-Token": adminToken,
+        "X-Shopify-Access-Token": token,
       },
       timeout: 5000,
     });
