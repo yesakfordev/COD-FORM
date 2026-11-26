@@ -850,7 +850,7 @@ module.exports = async function handler(req, res) {
     normalizedEmail,
   );
 
-  const tags = ["COD_Order"];
+  const tags = ["Pre_Order", "PreOrder_15_21_Days"];
   const idemTag = buildIdempotencyTag(idemKey);
   if (idemTag) tags.push(idemTag);
 
@@ -860,7 +860,8 @@ module.exports = async function handler(req, res) {
     { name: "Phone", value: normalizedPhone || phoneNumber || "" },
     { name: "City", value: city },
     { name: "Address", value: address },
-    { name: "Payment Method", value: "Cash on Delivery" },
+    { name: "Order Type", value: "Pre-Order (15-21 Days Delivery)" },
+    { name: "Payment Method", value: "50% Advance Required" },
     { name: "UTM source", value: utm_source || "" },
     { name: "UTM medium", value: utm_medium || "" },
     { name: "UTM campaign", value: utm_campaign || "" },
@@ -873,11 +874,12 @@ module.exports = async function handler(req, res) {
     { name: "User agent", value: clientUserAgent || "" },
   ].filter((n) => n.value !== "");
 
-  const noteText = `Cash on Delivery Order:
+  const noteText = `Pre-Order (15-21 Days Delivery):
 Customer: ${fullName}
 Phone: ${normalizedPhone || phoneNumber}
 City: ${city}
-Address: ${address}`;
+Address: ${address}
+Payment: 50% Advance Required`;
 
   // Build creation payload
   let endpoint;
@@ -975,31 +977,6 @@ Address: ${address}`;
       value: total,
       currency: entity.currency || "ETB",
     });
-
-    if (process.env.NOTION_TOKEN && (process.env.NOTION_DATABASE_ID || process.env.NOTION_DELIVERY_DATABASE_ID)) {
-      const scheduleNotion = async () => {
-        try {
-          const parentDb = isCreateOrder
-            ? (process.env.NOTION_DELIVERY_DATABASE_ID || process.env.NOTION_DATABASE_ID)
-            : process.env.NOTION_DATABASE_ID;
-          await syncToNotion({
-            entity,
-            isOrder: isCreateOrder,
-            store: SHOPIFY_STORE,
-            notionToken: process.env.NOTION_TOKEN,
-            databaseId: parentDb,
-            idempotencyKey: idemKey,
-          });
-        } catch (notionErr) {
-          console.error("Direct Notion sync error:", notionErr?.message || notionErr);
-        }
-      };
-      if (typeof waitUntil === "function") {
-        waitUntil(scheduleNotion());
-      } else {
-        scheduleNotion().catch(() => {});
-      }
-    }
 
     console.info("COD Order created successfully:", {
       type: isCreateOrder ? "order" : "draft_order",
