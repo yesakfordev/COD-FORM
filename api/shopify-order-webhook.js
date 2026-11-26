@@ -1,4 +1,6 @@
-require("dotenv").config();
+try {
+  require("dotenv").config();
+} catch (_) {}
 const crypto = require("crypto");
 const { Client } = require("@notionhq/client");
 let waitUntil;

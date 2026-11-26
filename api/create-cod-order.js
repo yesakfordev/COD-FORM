@@ -1,4 +1,6 @@
-require("dotenv").config();
+try {
+  require("dotenv").config();
+} catch (_) {}
 const axios = require("axios");
 const crypto = require("crypto");
 let waitUntil;

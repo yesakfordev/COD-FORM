@@ -1,4 +1,6 @@
-require("dotenv").config();
+try {
+  require("dotenv").config();
+} catch (_) {}
 const axios = require("axios");
 const { Client } = require("@notionhq/client");
 
